@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Remuneração PJ - Tech SP</title>
+    <style>
+        :root {
+            --primary-color: #2563eb; /* Azul Institucional */
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #10b981; /* Verde Dinheiro */
+            --danger-color: #ef4444; /* Vermelho Despesa */
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+        }
+
+        /* Cards Layout */
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 1.2em;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* Inputs Grid */
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper span {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 10px 10px 10px 35px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Results Display */
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text-muted);
+        }
+
+        .result-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .value-highlight {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+
+        /* Comparison Section */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tax-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .tax-card.good {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+
+        .tax-card.warning {
+            border-color: #fca5a5;
+            background: #fef2f2;
+        }
+
+        .tax-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .tax-amount {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--danger-color);
+            margin-bottom: 0.2rem;
+        }
+
+        .tax-rate {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Final Result */
+        .final-section {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .final-section .section-title, 
+        .final-section .result-label,
+        .final-section .input-group label,
+        .final-section .input-wrapper span {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .final-section .section-title::before {
+            background-color: white;
+        }
+
+        .final-section input {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .final-section input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .big-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            text-align: right;
+        }
+
+        .net-result-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Simulador PJ Tech & Impostos</h1>
+            <p>Cálculo de precificação e carga tributária para Prestadores de Serviço em TI (Simples Nacional).</p>
+        </header>
+
+        <!-- 1. ENTRADAS -->
+        <div class="card">
+            <h2 class="section-title">Composição da Remuneração Mensal</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Salário Base Pretendido</label>
+                    <div class="input-wrapper">
+                        <span>R$</span>
+                        <input type="number" id="salary" placeholder="0,00" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Vale Alimentação (VA)</label>
+                    <div class="input-wrapper">
+                        <span>R$</span>
+                        <input type="number" id="va" placeholder="0,00" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Vale Refeição (VR)</label>
+                    <div class="input-wrapper">
+                        <span>R$</span>
+                        <input type="number" id="vr" placeholder="0,00" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Vale Transporte (VT)</label>
+                    <div class="input-wrapper">
+                        <span>R$</span>
+                        <input type="number" id="vt" placeholder="0,00" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Plano de Saúde</label>
+                    <div class="input-wrapper">
+                        <span>R$</span>
+                        <input type="number" id="health" placeholder="0,00" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Plano Odontológico</label>
+                    <div class="input-wrapper">
+                        <span>R$</span>
+                        <input type="number" id="dental" placeholder="0,00" min="0" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. TOTAIS E PROVISÕES -->
+        <div class="card">
+            <h2 class="section-title">Montante e Provisões</h2>
+            
+            <div class="result-row">
+                <span class="result-label">Total Mensal (Soma dos Inputs)</span>
+                <span class="result-value value-highlight" id="totalMontante">R$ 0,00</span>
+            </div>
+
+            <div style="margin: 1rem 0; border-top: 1px dashed #cbd5e1;"></div>
+
+            <div class="result-row">
+                <span class="result-label">Provisão 13º (1/12)</span>
+                <span class="result-value" id="prov13">R$ 0,00</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Provisão Férias + 1/3 (1/12)</span>
+                <span class="result-value" id="provFerias">R$ 0,00</span>
+            </div>
+            
+            <div style="margin-top: 1rem; background: #f1f5f9; padding: 1rem; border-radius: 8px;">
+                <div class="result-row">
+                    <span class="result-label" style="font-weight: 600; color: var(--text-main);">Base de Faturamento Sugerida (Nota Fiscal)</span>
+                    <span class="result-value" style="color: var(--primary-color); font-size: 1.4rem;" id="totalInvoice">R$ 0,00</span>
+                </div>
+                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                    *Soma do Total Mensal + Provisões. Este deve ser o valor da sua Nota Fiscal para cobrir todos os custos.
+                </small>
+            </div>
+        </div>
+
+        <!-- 3. IMPOSTOS -->
+        <div class="card">
+            <h2 class="section-title">Cenários de Tributação (Simples Nacional)</h2>
+            <div class="comparison-grid">
+                <!-- Anexo III -->
+                <div class="tax-card good">
+                    <div class="tax-title">Sem Intelecto / Suporte Téc.<br>(Anexo III)</div>
+                    <div class="tax-amount" id="taxAnexo3">R$ 0,00</div>
+                    <div class="tax-rate">Alíquota estimada: ~6%</div>
+                    <p style="font-size: 0.8rem; margin-top: 8px; color: #475569;">
+                        Indicado para manutenção, suporte e infraestrutura.
+                    </p>
+                </div>
+
+                <!-- Anexo V -->
+                <div class="tax-card warning">
+                    <div class="tax-title">Intelecto / Desenvolvimento<br>(Anexo V)</div>
+                    <div class="tax-amount" id="taxAnexo5">R$ 0,00</div>
+                    <div class="tax-rate">Alíquota estimada: ~15.5%</div>
+                    <p style="font-size: 0.8rem; margin-top: 8px; color: #475569;">
+                        Indicado para consultoria e desenvolvimento (sem Fator R).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. RESULTADO FINAL -->
+        <div class="card final-section">
+            <h2 class="section-title">Resultado Líquido no Bolso</h2>
+            
+            <div class="comparison-grid">
+                <div>
+                    <div class="input-group">
+                        <label>Defina seu Pró-labore</label>
+                        <div class="input-wrapper">
+                            <span>R$</span>
+                            <input type="number" id="proLabore" placeholder="Ex: 1412,00" min="0" step="0.01">
+                        </div>
+                        <small style="color: rgba(255,255,255,0.7); margin-top: 5px; font-size: 0.75rem;">
+                            Base para INSS e aposentadoria. Mínimo: Salário Mínimo.
+                        </small>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <div class="result-row">
+                            <span class="result-label">INSS Devido (11%)</span>
+                            <span class="result-value" id="valInss">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="net-result-box">
+                    <span class="result-label" style="display: block; margin-bottom: 0.5rem;">Líquido Final (Cenário Anexo III)</span>
+                    <div class="big-number" id="finalNet">R$ 0,00</div>
+                    
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.8); text-align: right;">
+                         Faturamento - Imposto (6%) - INSS
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Constants
+        const ANEXO_III_RATE = 0.06; // 6%
+        const ANEXO_V_RATE = 0.155; // 15.5%
+        const INSS_RATE = 0.11; // 11%
+        const INSS_CEILING = 7786.02; // Teto INSS 2024
+        
+        // DOM Elements
+        const inputs = document.querySelectorAll('input[type="number"]');
+        const proLaboreInput = document.getElementById('proLabore');
+        
+        // Displays
+        const elTotalMontante = document.getElementById('totalMontante');
+        const elProv13 = document.getElementById('prov13');
+        const elProvFerias = document.getElementById('provFerias');
+        const elTotalInvoice = document.getElementById('totalInvoice');
+        const elTaxAnexo3 = document.getElementById('taxAnexo3');
+        const elTaxAnexo5 = document.getElementById('taxAnexo5');
+        const elValInss = document.getElementById('valInss');
+        const elFinalNet = document.getElementById('finalNet');
+
+        // Helper: Format Currency
+        const formatBRL = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        };
+
+        // Helper: Get Float Value from Input
+        const getVal = (id) => {
+            const val = parseFloat(document.getElementById(id).value);
+            return isNaN(val) ? 0 : val;
+        };
+
+        // Main Calculation Logic
+        const calculate = () => {
+            // 1. Sum Basic Inputs
+            const salary = getVal('salary');
+            const va = getVal('va');
+            const vr = getVal('vr');
+            const vt = getVal('vt');
+            const health = getVal('health');
+            const dental = getVal('dental');
+
+            const totalMontante = salary + va + vr + vt + health + dental;
+
+            // 2. Provisions
+            const prov13 = totalMontante / 12;
+            const provFerias = (totalMontante + (totalMontante / 3)) / 12; // Including 1/3 constitutional
+
+            // 3. Gross Invoice Base (Faturamento)
+            const grossInvoice = totalMontante + prov13 + provFerias;
+
+            // 4. Taxes
+            const taxIII = grossInvoice * ANEXO_III_RATE;
+            const taxV = grossInvoice * ANEXO_V_RATE;
+
+            // 5. Pró-labore & INSS
+            let proLabore = getVal('proLabore');
+            
+            // Logic: INSS is 11% of Pró-labore, capped at the ceiling contribution
+            // If Pró-labore > Ceiling, base is Ceiling.
+            const inssBase = proLabore > INSS_CEILING ? INSS_CEILING : proLabore;
+            const inssValue = inssBase * INSS_RATE;
+
+            // 6. Final Net (Based on Optimized Scenario - Anexo III)
+            // Net = Gross Invoice - Corporate Tax (Anexo III) - Personal INSS
+            // Note: Pró-labore is a transfer, not an expense that disappears, 
+            // but the tax on it (INSS) disappears. The Corporate Tax disappears.
+            const finalNet = grossInvoice - taxIII - inssValue;
+
+            // UPDATE UI
+            elTotalMontante.innerText = formatBRL(totalMontante);
+            elProv13.innerText = formatBRL(prov13);
+            elProvFerias.innerText = formatBRL(provFerias);
+            elTotalInvoice.innerText = formatBRL(grossInvoice);
+            
+            elTaxAnexo3.innerText = formatBRL(taxIII);
+            elTaxAnexo5.innerText = formatBRL(taxV);
+            
+            elValInss.innerText = formatBRL(inssValue);
+            elFinalNet.innerText = formatBRL(finalNet);
+        };
+
+        // Event Listeners
+        inputs.forEach(input => {
+            input.addEventListener('input', calculate);
+        });
+
+        // Initial Run
+        calculate();
+
+    </script>
+</body>
+</html>
